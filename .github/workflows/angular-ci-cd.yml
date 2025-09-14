@@ -1,5 +1,8 @@
 name: Angular CI/CD
 
+permissions:
+  contents: write  # Grant permission to push to gh-pages
+
 on:
   push:
     branches:
@@ -10,27 +13,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Setup Node.js (Angular 20 requires Node 20)
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      # 3. Install dependencies
       - name: Install dependencies
         run: npm ci
 
-      # 4. Build Angular app (production)
-      - name: Build Angular
+      - name: Build Angular app
         run: npm run build -- --configuration production
 
-      # 5. Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist/pc-web  # make sure this matches your angular.json outputPath
+          publish_dir: ./dist/pc-web
