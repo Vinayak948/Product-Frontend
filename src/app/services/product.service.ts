@@ -6,43 +6,53 @@ import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
-  private baseUrl = `${environment.apiBaseUrl}/product`; // match your backend route
+  private baseUrl = `${environment.apiBaseUrl}/products`;
 
   constructor(private http: HttpClient) {}
 
-  // List all products
   list(): Observable<Product[]> {
     return this.http.get<Product[]>(this.baseUrl);
   }
 
-  // Get single product by ID
   get(id: number): Observable<Product> {
     return this.http.get<Product>(`${this.baseUrl}/${id}`);
   }
 
-  // Create product (with optional image)
   create(data: { name: string; price: number }, imageFile?: File): Observable<Product> {
-    const formData = this.buildFormData(data, imageFile);
+    const formData = new FormData();
+    formData.append('Name', data.name);
+    formData.append('Price', data.price.toString());
+
+    if (imageFile) {
+      formData.append('Image', imageFile);
+    }
+
     return this.http.post<Product>(this.baseUrl, formData);
   }
 
-  // Update product (with optional image)
   update(id: number, data: { name: string; price: number }, imageFile?: File): Observable<Product> {
-    const formData = this.buildFormData(data, imageFile);
+    const formData = new FormData();
+    formData.append('Name', data.name);
+    formData.append('Price', data.price.toString());
+
+    if (imageFile) {
+      formData.append('Image', imageFile);
+    }
+
     return this.http.put<Product>(`${this.baseUrl}/${id}`, formData);
   }
 
-  // Delete product
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
-  // Helper: build FormData for create/update
-  private buildFormData(data: { name: string; price: number }, imageFile?: File): FormData {
+  uploadImage(id: number, file: File): Observable<HttpEvent<any>> {
     const formData = new FormData();
-    formData.append('name', data.name);
-    formData.append('price', String(data.price));
-    if (imageFile) formData.append('image', imageFile);
-    return formData;
+    formData.append('file', file);
+
+    return this.http.post<any>(`${this.baseUrl}/${id}/image`, formData, {
+      reportProgress: true,
+      observe: 'events'
+    });
   }
 }
