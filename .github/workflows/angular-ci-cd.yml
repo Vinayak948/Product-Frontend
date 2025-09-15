@@ -1,7 +1,4 @@
-name: Angular CI/CD
-
-permissions:
-  contents: write  # Grant permission to push to gh-pages
+name: Deploy Angular App to Azure Web App
 
 on:
   push:
@@ -13,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Setup Node.js
@@ -24,11 +21,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Angular app
+      - name: Build Angular App
         run: npm run build -- --configuration production
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist/pc-web
+          app-name: 'Product'
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: './dist/pc-web'  # This is the Angular production build output
